@@ -11,7 +11,7 @@ flask-limiter==4.1.1
 gunicorn>=22.0.0
 
 # 图片处理（必需）
-pillow==12.3.0
+pillow==13.0.0
 exifread==3.5.1
 
 # === 以下为可选依赖，按需安装 ===
