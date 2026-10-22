@@ -88,3 +88,8 @@ backend/users.json
 
 # Docker
 .docker/
+
+# Vue + Gin build and private runtime data
+server/data/
+server/footprint
+web/*.tsbuildinfo
