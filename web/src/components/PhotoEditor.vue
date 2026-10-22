@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import {t,locale} from '../i18n'
+
+import {networkOnline} from '../offline'
+import { reactive,ref } from 'vue'
+import { X,MapPin,Download,Trash2,Check } from 'lucide-vue-next'
+import { useModal } from '../useModal'
+import { api,media,originalMedia,type Photo } from '../api'
+import MemoryMap from './MemoryMap.vue'
+const dialog=useModal()
+const props=defineProps<{photo:Photo}>();const emit=defineEmits<{close:[];changed:[]}>()
+const form=reactive({...props.photo});const busy=ref(false),error=ref(''),confirmDelete=ref(false)
+function coordinate(event:Event, key:'latitude'|'longitude'){const value=(event.target as HTMLInputElement).value;form[key]=value===''?null:Number(value)}
+function select(coords:[number,number]){[form.latitude,form.longitude]=coords}
+async function save(){busy.value=true;error.value='';try{await api(`/photos/${form.id}`,{method:'PUT',body:JSON.stringify(form)});emit('changed');emit('close')}catch(e){error.value=(e as Error).message}finally{busy.value=false}}
+async function remove(){busy.value=true;try{await api(`/photos/${form.id}`,{method:'DELETE'});emit('changed');emit('close')}catch(e){error.value=(e as Error).message}finally{busy.value=false}}
+</script>
+<template><div class="overlay" @click.self="emit('close')"><section class="editor modal" ref="dialog" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="photo-title" @keydown.esc="emit('close')"><button class="icon close" :aria-label="t('关闭')" @click="emit('close')"><X/></button><div class="editor-image"><img :src="media(photo.id)" :alt="photo.title"></div><form class="editor-form" @submit.prevent="save"><div class="eyebrow">A MOMENT TO KEEP</div><h2 id="photo-title">{{t('把这一刻写下来')}}</h2><label>{{t('照片标题')}}<input v-model="form.title" maxlength="120" :placeholder="t('为这一刻起个名字')"></label><label>{{t('拍摄日期')}}<input v-model="form.taken_at" type="date" required></label><label>{{t('地点')}}<input v-model="form.place" maxlength="200" :placeholder="t('例如：杭州 · 西湖')"></label><label>{{t('照片备注')}}<textarea v-model="form.note" rows="3" maxlength="5000" :placeholder="t('那天的天气、说过的话，和想记住的小事…')"></textarea></label><details><summary><MapPin :size="15"/>{{t('在地图上标记位置')}}</summary><p class="muted small">{{t('点击地图选点，也可以直接填写经纬度。')}}</p><MemoryMap :photos="[]" pick :selected="form.latitude!==null&&form.longitude!==null?[form.latitude,form.longitude]:null" @select="select"/><div class="two-col"><label>{{t('纬度')}}<input :value="form.latitude" type="number" step="any" min="-90" max="90" @input="coordinate($event,'latitude')"></label><label>{{t('经度')}}<input :value="form.longitude" type="number" step="any" min="-180" max="180" @input="coordinate($event,'longitude')"></label></div><button type="button" class="text-button" @click="form.latitude=null;form.longitude=null">{{t('清除位置')}}</button></details><p v-if="error" class="error" role="alert">{{error}}</p><button class="primary" :disabled="busy"><Check :size="17"/>{{busy?t('处理中…'):t('保存回忆')}}</button><div class="editor-actions"><a :href="networkOnline?originalMedia(photo.id):undefined" :aria-disabled="!networkOnline" @click="!networkOnline&&$event.preventDefault()" :title="networkOnline?t('下载原图'):t('原图下载需要联网')" :download="photo.filename" class="text-button"><Download :size="15"/>{{t('下载原图')}}</a><button v-if="!confirmDelete" type="button" class="text-button danger" @click="confirmDelete=true"><Trash2 :size="15"/>{{t('删除')}}</button><span v-else class="delete-confirm">{{t('删除后无法撤销。')}}<button type="button" :disabled="busy" class="text-button danger" @click="remove">{{t('确认删除')}}</button><button type="button" class="text-button" @click="confirmDelete=false">{{t('取消')}}</button></span></div></form></section></div></template>

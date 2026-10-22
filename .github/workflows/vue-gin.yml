@@ -1,0 +1,31 @@
+name: Vue and Gin
+on:
+  push:
+    paths: ['server/**', 'web/**', 'Dockerfile.v2', 'compose.v2.yml', '.github/workflows/vue-gin.yml']
+  pull_request:
+    paths: ['server/**', 'web/**', 'Dockerfile.v2', 'compose.v2.yml', '.github/workflows/vue-gin.yml']
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Go integration and race tests
+        working-directory: server
+        run: go test -race ./...
+      - name: Go static checks
+        working-directory: server
+        run: go vet ./...
+      - name: Vue type check and production build
+        working-directory: web
+        run: npm ci && npm test && npm run build
+      - name: Docker Compose configuration
+        run: docker compose -f compose.v2.yml config --quiet

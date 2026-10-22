@@ -1,0 +1,10 @@
+.git
+web/node_modules
+web/dist
+server/data
+server/footprint
+backend/uploads
+**/__pycache__
+.env
+.env.*
+data

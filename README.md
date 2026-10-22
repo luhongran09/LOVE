@@ -1,5 +1,7 @@
 # 🧭 足迹 Footprint · 记录你的山海与寻味之旅
 
+> **Vue + Go/Gin 迁移版已新增**：多图回忆、1/4/9 宫格、3D 地球、情侣与生活工具、旧版 ZIP 内容导入。新版代码在 `web/` 与 `server/`，启动方式见 [新版说明](docs/VUE-GIN.md)，完整状态和剩余差异见 [迁移进度](docs/MIGRATION-PROGRESS.md)。下文为原版说明。
+
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-2ea44f?style=flat&logo=github)](https://linkingoscar.github.io/footprint/)
